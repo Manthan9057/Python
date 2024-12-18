@@ -1,28 +1,19 @@
 import streamlit as st
-from flask import Flask, render_template_string, request, jsonify, send_from_directory
+from flask import Flask, render_template_string, request, jsonify
+import re
 import threading
 import socket
-import re
 import time
+import webbrowser
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.by import By
 from webdriver_manager.chrome import ChromeDriverManager
-from streamlit.web import cli as stcli
-import os
 
 # Flask App Initialization
-app = Flask(__name__, static_folder="static")
+app = Flask(__name__)
 
-# Save the uploaded logo into the static folder
-logo_path = "logo.png"
-if not os.path.exists("static"):
-    os.makedirs("static")
-if not os.path.exists(logo_path):
-    with open(logo_path, "wb") as f:
-        f.write(open("logo.png", "rb").read())
-
-# HTML Template for Flask UI
+# HTML Template for the web interface
 HTML_TEMPLATE = """
 <!DOCTYPE html>
 <html lang="en">
@@ -55,10 +46,6 @@ HTML_TEMPLATE = """
             color: #FF0000;
             font-size: 24px;
         }
-        img {
-            max-width: 150px;
-            margin-bottom: 20px;
-        }
         input[type="text"] {
             width: 80%;
             padding: 10px;
@@ -80,19 +67,35 @@ HTML_TEMPLATE = """
         button:hover {
             background-color: #cc0000;
         }
+        .count-section {
+            margin-top: 20px;
+            font-size: 18px;
+            color: #333;
+        }
+        .count-section span {
+            font-weight: bold;
+            font-size: 20px;
+            color: #FF0000;
+        }
     </style>
 </head>
 <body>
-<div class="container">
-    <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo">
+
+<div class="container" id="mainPage">
     <h1>YouTube Viewer</h1>
     <p>Enter the YouTube URL below:</p>
     <input type="text" id="youtubeUrl" placeholder="Paste YouTube URL here" />
     <br>
-    <button onclick="redirectToVideo()">Open in Incognito 10 Times</button>
+    <button onclick="redirectToVideo()">Open Video</button>
+
+    <div class="count-section">
+        <p>Click Count: <span id="countDisplay">0</span></p>
+    </div>
 </div>
 
 <script>
+    let count = 0;
+
     function redirectToVideo() {
         const url = document.getElementById('youtubeUrl').value;
 
@@ -107,7 +110,9 @@ HTML_TEMPLATE = """
                 body: JSON.stringify({ url: url })
             }).then(response => response.json()).then(data => {
                 if (data.success) {
-                    alert("Opening video in incognito mode 10 times with 10-minute intervals.");
+                    count++;
+                    document.getElementById('countDisplay').textContent = count;
+                    alert("Video URL: " + data.url);
                 } else {
                     alert(data.message);
                 }
@@ -117,58 +122,60 @@ HTML_TEMPLATE = """
         }
     }
 </script>
+
 </body>
 </html>
 """
 
-# Regular expression for YouTube URL validation
+# Global variables
+click_count = 0
+click_count_lock = threading.Lock()
 youtube_regex = re.compile(r'^(https?\:\/\/)?(www\.youtube\.com|youtu\.be)\/.+$')
 
-# Flask route
+# Flask Routes
 @app.route('/')
 def home():
     return render_template_string(HTML_TEMPLATE)
 
 @app.route('/redirect', methods=['POST'])
 def redirect_to_video():
+    global click_count
     data = request.get_json()
     url = data.get('url', '')
 
     if youtube_regex.match(url):
-        # Open video in incognito mode 10 times
-        threading.Thread(target=open_in_incognito_multiple_times, args=(url, 10, 600)).start()
-        return jsonify(success=True, message="Opening video in incognito 10 times with 10-minute intervals.", url=url)
+        with click_count_lock:
+            click_count += 1
+        return jsonify(success=True, message="Video URL is valid!", url=url, count=click_count)
     else:
         return jsonify(success=False, message="Invalid YouTube URL.")
 
-# Function to open a YouTube video in incognito mode
-def open_in_incognito(url):
-    chrome_options = Options()
-    chrome_options.add_argument("--incognito")
-    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
-    driver.get(url)
-
-# Function to open video in incognito mode multiple times
-def open_in_incognito_multiple_times(url, count, interval):
-    for i in range(count):
-        open_in_incognito(url)
-        if i < count - 1:  # Avoid sleeping after the last execution
-            time.sleep(interval)
-
-# Streamlit UI
-st.image(logo_path, width=150)
+# Streamlit UI Integration
+st.image("logo.png", width=150)  # Add the logo directly
 st.title("YouTube Video Redirect")
 st.write("Enter the YouTube URL below:")
 youtube_url = st.text_input("Paste YouTube URL here")
 
-if st.button("Open Video in Incognito 10 Times"):
+# Selenium Integration for Opening URLs in Incognito Mode
+def open_in_incognito(url, count=10, interval=60):
+    for i in range(count):
+        service = Service(ChromeDriverManager().install())
+        options = webdriver.ChromeOptions()
+        options.add_argument("--incognito")
+        driver = webdriver.Chrome(service=service, options=options)
+        driver.get(url)
+        time.sleep(5)  # Allow the video to load
+        driver.quit()
+        time.sleep(interval)  # Wait between openings
+
+if st.button("Open in Incognito 10 Times"):
     if youtube_regex.match(youtube_url):
-        st.success("Opening video in incognito mode 10 times with 10-minute intervals.")
-        threading.Thread(target=open_in_incognito_multiple_times, args=(youtube_url, 10, 600)).start()
+        st.success("Opening the video 10 times in incognito mode with a 10-second gap...")
+        threading.Thread(target=open_in_incognito, args=(youtube_url, 10, 10)).start()
     else:
         st.error("Invalid YouTube URL. Please enter a valid URL.")
 
-# Helper function to get the local IP address
+# Local IP Display
 def get_local_ip():
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     try:
@@ -178,21 +185,15 @@ def get_local_ip():
         s.close()
     return ip
 
-# Display network address
-def display_network_info():
-    local_ip = get_local_ip()
-    st.write(f"Access this app on your local network at: http://{local_ip}:8501")
+local_ip = get_local_ip()
+st.write(f"Access Flask UI at: [http://{local_ip}:5000](http://{local_ip}:5000)")
 
-display_network_info()
-
-# Run Flask App in a separate thread
+# Run Flask in Background
 def run_flask():
-    app.run(debug=False, use_reloader=False)
+    app.run(debug=False, use_reloader=False, port=5000)
 
 if __name__ == "__main__":
     flask_thread = threading.Thread(target=run_flask)
     flask_thread.daemon = True
     flask_thread.start()
-
-    # Start Streamlit App
-    stcli.main()
+    st.write("Flask server is running in the background.")
