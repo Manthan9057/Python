@@ -24,7 +24,7 @@ HTML_TEMPLATE = """
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
+            background-color: lightblue;
             margin: 0;
             padding: 0;
             display: flex;
@@ -34,7 +34,7 @@ HTML_TEMPLATE = """
             color: #333;
         }
         .container {
-            background-color: white;
+            background-color: lightblue;
             padding: 30px;
             border-radius: 8px;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
