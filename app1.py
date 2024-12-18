@@ -15,12 +15,12 @@ import os
 app = Flask(__name__, static_folder="static")
 
 # Save the uploaded logo into the static folder
-logo_path = "static/logo.png"
+logo_path = "logo.png"
 if not os.path.exists("static"):
     os.makedirs("static")
 if not os.path.exists(logo_path):
     with open(logo_path, "wb") as f:
-        f.write(open("/mnt/data/logo.png", "rb").read())
+        f.write(open("logo.png", "rb").read())
 
 # HTML Template for Flask UI
 HTML_TEMPLATE = """
