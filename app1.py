@@ -160,7 +160,7 @@ st.markdown(
     .stApp {
         background-color: black;
     }
-    .stTextInput, .stButton, .stMarkdown {
+  .sth1, .stTextInput, .stButton, .stMarkdown {
         color: white;
     }
     </style>
