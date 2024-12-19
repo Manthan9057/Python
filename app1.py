@@ -156,9 +156,12 @@ def redirect_to_video():
 st.markdown(
     """
     <style>
-    body, .stApp, .stTextInput, .stButton, .stMarkdown {
+    body, .stApp, .stTextInput, .stMarkdown {
         color: white;
         background-color: black;
+    }
+ .stButton {
+        color: white;
     }
     .stTextInput input {
         color: white !important;
