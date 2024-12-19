@@ -155,11 +155,11 @@ st.markdown(
     """
     <style>
     body {
-        background-color: #333333;
+        background-color: darkblue;
         color: white;
     }
     .stApp {
-        background-color: #333333;
+        background-color: darkblue;
     }
     </style>
     """,
