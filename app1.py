@@ -4,10 +4,8 @@ import re
 import threading
 import socket
 import time
-import webbrowser
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.common.by import By
 from webdriver_manager.chrome import ChromeDriverManager
 
 # Flask App Initialization
@@ -24,7 +22,7 @@ HTML_TEMPLATE = """
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: lightblue;
+            background-color: black;
             margin: 0;
             padding: 0;
             display: flex;
@@ -34,10 +32,10 @@ HTML_TEMPLATE = """
             color: white;
         }
         .container {
-            background-color: lightblue;
+            background-color: #333;
             padding: 30px;
             border-radius: 8px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
             text-align: center;
             max-width: 400px;
             width: 100%;
@@ -46,6 +44,9 @@ HTML_TEMPLATE = """
             color: white;
             font-size: 24px;
         }
+        p, input, button, .count-section {
+            color: white;
+        }
         input[type="text"] {
             width: 80%;
             padding: 10px;
@@ -53,6 +54,8 @@ HTML_TEMPLATE = """
             margin-top: 10px;
             border-radius: 4px;
             border: 1px solid #ddd;
+            background-color: #444;
+            color: white;
         }
         button {
             background-color: #FF0000;
@@ -70,7 +73,6 @@ HTML_TEMPLATE = """
         .count-section {
             margin-top: 20px;
             font-size: 18px;
-            color: white;
         }
         .count-section span {
             font-weight: bold;
@@ -154,14 +156,14 @@ def redirect_to_video():
 st.markdown(
     """
     <style>
-    body {
-        background-color: black;
-    }
-    .stApp {
-        background-color: black;
-    }
-  .sth1, .stTextInput, .stButton, .stMarkdown {
+    body, .stApp, .stTextInput, .stButton, .stMarkdown {
         color: white;
+        background-color: black;
+    }
+    .stTextInput input {
+        color: white !important;
+        background-color: #333 !important;
+        border: 1px solid white !important;
     }
     </style>
     """,
@@ -169,11 +171,11 @@ st.markdown(
 )
 st.image("logo.png", width=150, use_column_width=False, caption=None)
 st.title("YouTube Video Redirect")
-st.write("Enter the YouTube URL below:", unsafe_allow_html=True)
+st.write("Enter the YouTube URL below:")
 youtube_url = st.text_input("Paste YouTube URL here")
 
 # Selenium Integration for Opening URLs in Incognito Mode
-def open_in_incognito(url, count=10, interval=60):
+def open_in_incognito(url, count=10, interval=10):
     for i in range(count):
         service = Service(ChromeDriverManager().install())
         options = webdriver.ChromeOptions()
@@ -202,7 +204,7 @@ def get_local_ip():
     return ip
 
 local_ip = get_local_ip()
-st.write(f"Access Flask UI at: [http://{local_ip}:5000](http://{local_ip}:5000)", unsafe_allow_html=True)
+st.write(f"Access Flask UI at: [http://{local_ip}:5000](http://{local_ip}:5000)")
 
 # Run Flask in Background
 def run_flask():
