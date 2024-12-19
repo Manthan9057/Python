@@ -58,12 +58,12 @@ HTML_TEMPLATE = """
             color: white;
         }
            button {
-            background-color: #FF0000;
+            background-color: BLACK;
             color: white;
             padding: 10px 20px;
             border: none;
             border-radius: 4px;
-            cursor: pointer;
+           
             margin-top: 20px;
             font-size: 16px;
         }
