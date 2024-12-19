@@ -31,7 +31,7 @@ HTML_TEMPLATE = """
             justify-content: center;
             align-items: center;
             height: 100vh;
-            color: #333;
+            color: white;
         }
         .container {
             background-color: lightblue;
@@ -43,7 +43,7 @@ HTML_TEMPLATE = """
             width: 100%;
         }
         h1 {
-               color: #FF0000;
+            color: white;
             font-size: 24px;
         }
         input[type="text"] {
@@ -70,12 +70,12 @@ HTML_TEMPLATE = """
         .count-section {
             margin-top: 20px;
             font-size: 18px;
-              color: #FF0000;
+            color: white;
         }
         .count-section span {
             font-weight: bold;
             font-size: 20px;
-            color: #FF0000;
+            color: white;
         }
     </style>
 </head>
@@ -155,11 +155,13 @@ st.markdown(
     """
     <style>
     body {
-        background-color: white;
-        color: white;
+        background-color: black;
     }
     .stApp {
         background-color: black;
+    }
+    .stTextInput, .stButton, .stMarkdown {
+        color: white;
     }
     </style>
     """,
@@ -167,7 +169,7 @@ st.markdown(
 )
 st.image("logo.png", width=150, use_column_width=False, caption=None)
 st.title("YouTube Video Redirect")
-st.write("Enter the YouTube URL below:")
+st.write("Enter the YouTube URL below:", unsafe_allow_html=True)
 youtube_url = st.text_input("Paste YouTube URL here")
 
 # Selenium Integration for Opening URLs in Incognito Mode
@@ -200,7 +202,7 @@ def get_local_ip():
     return ip
 
 local_ip = get_local_ip()
-st.write(f"Access Flask UI at: [http://{local_ip}:5000](http://{local_ip}:5000)")
+st.write(f"Access Flask UI at: [http://{local_ip}:5000](http://{local_ip}:5000)", unsafe_allow_html=True)
 
 # Run Flask in Background
 def run_flask():
