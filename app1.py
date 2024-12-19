@@ -43,7 +43,7 @@ HTML_TEMPLATE = """
             width: 100%;
         }
         h1 {
-            color: #FF0000;
+            color: white;
             font-size: 24px;
         }
         input[type="text"] {
