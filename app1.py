@@ -57,7 +57,7 @@ HTML_TEMPLATE = """
             background-color: #444;
             color: white;
         }
-        button {
+           button {
             background-color: #FF0000;
             color: white;
             padding: 10px 20px;
