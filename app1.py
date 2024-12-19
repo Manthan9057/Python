@@ -67,9 +67,7 @@ HTML_TEMPLATE = """
             margin-top: 20px;
             font-size: 16px;
         }
-        button:hover {
-            background-color: #cc0000;
-        }
+      
         .count-section {
             margin-top: 20px;
             font-size: 18px;
