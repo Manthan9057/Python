@@ -43,7 +43,7 @@ HTML_TEMPLATE = """
             width: 100%;
         }
         h1 {
-            color: white;
+               color: #FF0000;
             font-size: 24px;
         }
         input[type="text"] {
@@ -70,7 +70,7 @@ HTML_TEMPLATE = """
         .count-section {
             margin-top: 20px;
             font-size: 18px;
-            color: #333;
+              color: #FF0000;
         }
         .count-section span {
             font-weight: bold;
