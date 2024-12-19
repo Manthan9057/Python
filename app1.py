@@ -155,7 +155,7 @@ st.markdown(
     """
     <style>
     body {
-        background-color: lightgreen;
+        background-color: white;
         color: white;
     }
     .stApp {
