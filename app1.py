@@ -24,7 +24,7 @@ HTML_TEMPLATE = """
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: lightblue;
+             background-color: #b0e0e6;
             margin: 0;
             padding: 0;
             display: flex;
