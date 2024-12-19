@@ -24,7 +24,7 @@ HTML_TEMPLATE = """
     <style>
         body {
             font-family: Arial, sans-serif;
-             background-color: #b0e0e6;
+            background-color: lightblue;
             margin: 0;
             padding: 0;
             display: flex;
@@ -151,6 +151,24 @@ def redirect_to_video():
         return jsonify(success=False, message="Invalid YouTube URL.")
 
 # Streamlit UI Integration
+st.markdown(
+    """
+    <style>
+    body {
+        background-color: #b0e0e6; /* Powder blue background */
+    }
+    .stImage {
+        margin-top: 20px;
+        margin-bottom: 20px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
 st.image("logo.png", width=150)  # Add the logo directly
 st.title("YouTube Video Redirect")
 st.write("Enter the YouTube URL below:")
