@@ -158,11 +158,14 @@ st.markdown(
         background-color: #333333;
         color: white;
     }
+    .stApp {
+        background-color: #333333;
+    }
     </style>
     """,
     unsafe_allow_html=True
 )
-st.image("logo.png", width=150)
+st.image("logo.png", width=150, use_column_width=False, caption=None)
 st.title("YouTube Video Redirect")
 st.write("Enter the YouTube URL below:")
 youtube_url = st.text_input("Paste YouTube URL here")
