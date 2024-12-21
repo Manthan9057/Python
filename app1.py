@@ -5,8 +5,9 @@ import threading
 import socket
 import time
 from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.chrome.service import Service
+
 
 # Flask App Initialization
 app = Flask(__name__)
