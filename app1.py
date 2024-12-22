@@ -1,13 +1,12 @@
 import streamlit as st
 from flask import Flask, render_template_string, request, jsonify
-import re
 import threading
+import re
 import socket
 import time
 from selenium import webdriver
-from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.chrome.service import Service
-
+from webdriver_manager.chrome import ChromeDriverManager
 
 # Flask App Initialization
 app = Flask(__name__)
@@ -134,37 +133,30 @@ def redirect_to_video():
 st.markdown(
     """
     <style>
-    body, .stApp, .stTextInput {
-        color: white;
+    body, .stApp {
         background-color: black;
-    }
-    .stTextInput input {
-        color: white !important;
-        background-color: #333 !important;
-        border: 1px solid white !important;
-    }
-    .stButton>button {
-        background-color: black !important;
-        color: white !important;
+        color: white;
     }
     </style>
     """,
     unsafe_allow_html=True
 )
-st.image("logo.png", width=150, caption=None)
 st.title("YouTube Video Redirect")
 youtube_url = st.text_input("Paste YouTube URL here:")
 
 def open_in_incognito(url, count=10, interval=10):
-    for _ in range(count):
-        service = Service(ChromeDriverManager().install())
-        options = webdriver.ChromeOptions()
-        options.add_argument("--incognito")
-        driver = webdriver.Chrome(service=service, options=options)
-        driver.get(url)
-        time.sleep(5)
-        driver.quit()
-        time.sleep(interval)
+    try:
+        for _ in range(count):
+            service = Service(ChromeDriverManager().install())
+            options = webdriver.ChromeOptions()
+            options.add_argument("--incognito")
+            driver = webdriver.Chrome(service=service, options=options)
+            driver.get(url)
+            time.sleep(5)
+            driver.quit()
+            time.sleep(interval)
+    except Exception as e:
+        st.error(f"Error: {e}")
 
 if st.button("Open in Incognito 10 Times"):
     if youtube_regex.match(youtube_url):
@@ -182,11 +174,11 @@ def get_local_ip():
     finally:
         s.close()
 
-st.write(f"Access Flask UI at: [http://{get_local_ip()}:5000](http://{get_local_ip()}:5000)")
+st.write(f"Access Flask UI at: [http://{get_local_ip()}:5050](http://{get_local_ip()}:5050)")
 
 # Run Flask
 def run_flask():
-    app.run(debug=False, use_reloader=False, port=5000)
+    app.run(debug=False, use_reloader=False, port=5050)
 
 if __name__ == "__main__":
     flask_thread = threading.Thread(target=run_flask)
