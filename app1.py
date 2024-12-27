@@ -4,10 +4,11 @@ import re
 import threading
 import socket
 import time
+import webbrowser
 from selenium import webdriver
-from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.chrome.service import Service
-
+from selenium.webdriver.common.by import By
+from webdriver_manager.chrome import ChromeDriverManager
 
 # Flask App Initialization
 app = Flask(__name__)
@@ -23,24 +24,26 @@ HTML_TEMPLATE = """
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: black;
-            color: white;
+            background-color: lightblue;
+            margin: 0;
+            padding: 0;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
-            margin: 0;
+            color: #333;
         }
         .container {
-            background-color: #333;
+            background-color: lightblue;
             padding: 30px;
             border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
             text-align: center;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
             max-width: 400px;
             width: 100%;
         }
         h1 {
+            color: #FF0000;
             font-size: 24px;
         }
         input[type="text"] {
@@ -48,48 +51,62 @@ HTML_TEMPLATE = """
             padding: 10px;
             font-size: 16px;
             margin-top: 10px;
-            border: 1px solid #ddd;
             border-radius: 4px;
-            background-color: #444;
-            color: white;
+            border: 1px solid #ddd;
         }
         button {
-            background-color: black;
+            background-color: #FF0000;
             color: white;
             padding: 10px 20px;
             border: none;
             border-radius: 4px;
-            font-size: 16px;
+            cursor: pointer;
             margin-top: 20px;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #cc0000;
         }
         .count-section {
             margin-top: 20px;
             font-size: 18px;
+            color: #333;
         }
         .count-section span {
             font-weight: bold;
+            font-size: 20px;
+            color: #FF0000;
         }
     </style>
 </head>
 <body>
-<div class="container">
+
+<div class="container" id="mainPage">
     <h1>YouTube Viewer</h1>
     <p>Enter the YouTube URL below:</p>
     <input type="text" id="youtubeUrl" placeholder="Paste YouTube URL here" />
+    <br>
     <button onclick="redirectToVideo()">Open Video</button>
+
     <div class="count-section">
         <p>Click Count: <span id="countDisplay">0</span></p>
     </div>
 </div>
+
 <script>
     let count = 0;
+
     function redirectToVideo() {
         const url = document.getElementById('youtubeUrl').value;
-        const youtubeRegex = /^(https?:\\/\\/)?(www\\.youtube\\.com|youtu\\.be)\\/.+$/;
+
+        const youtubeRegex = /^(https?\:\/\/)?(www\.youtube\.com|youtu\.be)\/.+$/;
+
         if (youtubeRegex.test(url)) {
             fetch('/redirect', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                },
                 body: JSON.stringify({ url: url })
             }).then(response => response.json()).then(data => {
                 if (data.success) {
@@ -105,11 +122,12 @@ HTML_TEMPLATE = """
         }
     }
 </script>
+
 </body>
 </html>
 """
 
-# Global Variables
+# Global variables
 click_count = 0
 click_count_lock = threading.Lock()
 youtube_regex = re.compile(r'^(https?\:\/\/)?(www\.youtube\.com|youtu\.be)\/.+$')
@@ -124,67 +142,67 @@ def redirect_to_video():
     global click_count
     data = request.get_json()
     url = data.get('url', '')
+
     if youtube_regex.match(url):
         with click_count_lock:
             click_count += 1
         return jsonify(success=True, message="Video URL is valid!", url=url, count=click_count)
-    return jsonify(success=False, message="Invalid YouTube URL.")
+    else:
+        return jsonify(success=False, message="Invalid YouTube URL.")
 
-# Streamlit UI
+# Streamlit UI Integration
 st.markdown(
     """
     <style>
-    body, .stApp, .stTextInput {
+    body {
+        background-color: #333333;
         color: white;
-        background-color: black;
     }
-    .stTextInput input {
-        color: white !important;
-        background-color: #333 !important;
-        border: 1px solid white !important;
-    }
-    .stButton>button {
-        background-color: black !important;
-        color: white !important;
+    .stApp {
+        background-color: #333333;
     }
     </style>
     """,
     unsafe_allow_html=True
 )
-st.image("logo.png", width=150, caption=None)
+st.image("logo.png", width=150, use_column_width=False, caption=None)
 st.title("YouTube Video Redirect")
-youtube_url = st.text_input("Paste YouTube URL here:")
+st.write("Enter the YouTube URL below:")
+youtube_url = st.text_input("Paste YouTube URL here")
 
-def open_in_incognito(url, count=10, interval=10):
-    for _ in range(count):
+# Selenium Integration for Opening URLs in Incognito Mode
+def open_in_incognito(url, count=10, interval=60):
+    for i in range(count):
         service = Service(ChromeDriverManager().install())
         options = webdriver.ChromeOptions()
         options.add_argument("--incognito")
         driver = webdriver.Chrome(service=service, options=options)
         driver.get(url)
-        time.sleep(5)
+        time.sleep(5)  # Allow the video to load
         driver.quit()
-        time.sleep(interval)
+        time.sleep(interval)  # Wait between openings
 
 if st.button("Open in Incognito 10 Times"):
     if youtube_regex.match(youtube_url):
-        st.success("Opening video 10 times in incognito mode...")
+        st.success("Opening the video 10 times in incognito mode with a 10-second gap...")
         threading.Thread(target=open_in_incognito, args=(youtube_url, 10, 10)).start()
     else:
-        st.error("Invalid YouTube URL. Please try again.")
+        st.error("Invalid YouTube URL. Please enter a valid URL.")
 
-# Local IP
+# Local IP Display
 def get_local_ip():
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     try:
         s.connect(("8.8.8.8", 80))
-        return s.getsockname()[0]
+        ip = s.getsockname()[0]
     finally:
         s.close()
+    return ip
 
-st.write(f"Access Flask UI at: [http://{get_local_ip()}:5000](http://{get_local_ip()}:5000)")
+local_ip = get_local_ip()
+st.write(f"Access Flask UI at: [http://{local_ip}:5000](http://{local_ip}:5000)")
 
-# Run Flask
+# Run Flask in Background
 def run_flask():
     app.run(debug=False, use_reloader=False, port=5000)
 
@@ -192,4 +210,4 @@ if __name__ == "__main__":
     flask_thread = threading.Thread(target=run_flask)
     flask_thread.daemon = True
     flask_thread.start()
-    st.write("Flask server is running in the background.")   
+    st.write("Flask server is running in the background.")
